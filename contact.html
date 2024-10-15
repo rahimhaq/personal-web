@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Me</title>
+    <link rel="stylesheet" href="asset/css/contact.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul class="nav-links">
+                <li>
+                    <img src="asset/img/dumbways.png" alt="Dumbways Logo" style="width: 70px;">
+                </li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#">My Project</a></li>
+            <a href="contact.html" class="btn-contact" >Contact Me</a>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1>GET IN TOUCH</h1>
+            <form action="#" method="post">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="phone">Phone Number</label>
+                <input type="text" id="phone" name="phone" required>
+
+                <label for="subject">Subject</label>
+                <select id="subject" name="subject">
+                    <option value="Full-Stack Developer">Full-Stack Developer</option>
+                    <option value="DevOps Engineer">DevOps Engineer</option>
+                </select>
+
+                <label for="message">Your Message</label>
+                <textarea id="message" name="message" rows="5" required></textarea>
+
+                <button type="submit">submit</button>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

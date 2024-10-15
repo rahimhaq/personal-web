@@ -3,44 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Web Card</title>
-    <link rel="stylesheet" href="asset/css/nav.css">
+    <title>My Project</title>
     <link rel="stylesheet" href="asset/css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <nav>
-        <ul style="
-            background-color: rgb(103, 104, 140); list-style-type: none; display: flex; gap: 15px; padding: 5px; align-items: center;">
+    <header>
+        <nav>
+            <ul class="nav-links">
+                <li>
+                    <img src="asset/img/dumbways.png" alt="Dumbways Logo" style="width: 70px;">
+                </li>
+                <li style="font-weight: 700;"><a href="#">Home</a></li>
+                <li><a href="#">My Project</a></li>
+            <a href="contact.html" class="btn-contact" >Contact Me</a>
+            </ul>
             
-            <li>
-                <img src="asset/img/dumbways.png" alt="logo" style="width: 70px;" class="bckground-logo">
-            </li>
-            <li>
-                <a href="index.html" class="btn-putih"> Home </a>
-            </li>
-            <li style="display: flex; justify-content: first baseline; width: 20rem;">
-                <a href="" class="btn-putih"> My Project </a>
-            </li>
-            <li style="display: flex; justify-content: flex-end; width: 80%;">
-                <a href="contact.html" class="btn-putih"> Contact Me </a>
-            </li>
-        </ul>
-    </nav>
-    
-    <div style="margin: auto; border-radius: 10px; width: 300px; padding: 15px; box-shadow: 5px 5px 10px 1px rgba(0, 0, 0, 0.5);">
-        <img src="asset/img/Rahim.png" alt="Foto" style="width: 100%;">
-        <h1 style="text-align: center; font-weight: 600;">Rahiim Tahajjadan Zhaahir Haq</h1>
-        <p style="text-align: center;">Mahasiswa Teknologi Rekayasa Komputer yang berpengalaman dalam dunia design grafis, UI UX Designer, Web Programming, IoT Engineer</p>
-        <table border="1px" style="border-collapse: collapse; width: 100%">
-            <tr>
-                <th> Experience </th>
-                <th> Year </th>
-            </tr>
-            <tr>
-                <th> Develop Personal Website </th>
-                <th> 2024 </th>
-            </tr>
-        </table>
-    </div>
+            
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="content">
+                <h1>Hi Welcome to my hut</h1>
+                <p>Mahasiswa Teknologi Rekayasa Komputer sarjana terapan yang berpengalaman dalam dunia Web Programming,
+                    UI UX Designer, IoT Engineer. Memiliki kemampuan dalam pengembangan API, MySQL, managemen sistem
+                    kontrol, opstimasi sistem, troubleshooting. Selain dari pada itu, memiliki kemampuan dalam memimpin dalam
+                    suatu tim, kerja sama tim, keterampilan organisasi, keterampilan komunikasi yang luar biasa, keterampilan
+                    interpersonal, sangat mudah beradaptasi, dan mampu bekerja secara mandiri. Memiliki ketertarikan bekerja dalam
+                    Data Scientiest, Data Analyst, Internet of things (IoT) Engineer, Full-Stack Developer, Cyber Security.</p>
+                <div class="buttons">
+                    <button class="btn">contact</button>
+                    <a href="asset/cv/CV_Rahiim Tahajjadan Zhaahir Haq.pdf" download class="btn download">download CV <i class="fas fa-download"></i></a>
+                </div>
+                <div class="social-icons">
+                    <a href="https://www.linkedin.com/in/rahimhaq/"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://www.instagram.com/rahimhaq"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.facebook.com/rahimhaq15/"><i class="fab fa-facebook"></i></a>
+                    <a href="https://x.com/rahimhaq15"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+            <div class="profile-card">
+                <img src="asset/img/Rahim.png" alt="Profile Picture">
+                <h2>Rahiim Tahajjadan Zhaahir Haq</h2>
+                <p>Fullstack Developer</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 </body>
 </html>
