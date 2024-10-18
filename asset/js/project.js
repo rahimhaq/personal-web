@@ -5,18 +5,24 @@ function formatDate(dateString) {
     return date.toLocaleDateString('en-GB', options);  // Format: dd MMM yyyy
 }
 
-// Fungsi untuk menghitung durasi proyek dan mengonversi ke minggu jika lebih dari 5 hari
 function calculateDuration(startDate, endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffTime = Math.abs(end - start); // Menghitung selisih waktu dalam milidetik
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Mengonversi milidetik ke hari
 
-    if (diffDays > 5) {
+    if (diffDays >= 30) {
+        // Jika lebih dari atau sama dengan 30 hari, hitung dalam bulan
+        const months = Math.floor(diffDays / 30);  // Hitung bulan
+        const remainingDays = diffDays % 30;  // Hitung sisa hari setelah dihitung bulan
+        return remainingDays > 0 ? `${months} month(s) and ${remainingDays} day(s)` : `${months} month(s)`;
+    } else if (diffDays > 5) {
+        // Jika lebih dari 5 hari, hitung dalam minggu
         const weeks = Math.ceil(diffDays / 7);
-        return `${weeks} week(s)`;  // Menghitung dalam minggu jika lebih dari 5 hari
+        return `${weeks} week(s)`; 
     } else {
-        return `${diffDays} day(s)`;  // Menghitung dalam hari jika kurang dari 5 hari
+        // Jika kurang dari atau sama dengan 5 hari, hitung dalam hari
+        return `${diffDays} day(s)`; 
     }
 }
 
