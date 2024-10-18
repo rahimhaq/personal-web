@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Me</title>
+    <link rel="stylesheet" href="asset/css/project.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul class="nav-links">
+                <li><img src="asset/img/dumbways.png" alt="Dumbways Logo" style="width: 70px;"></li>
+                <li><a href="index.html">Home</a></li>
+                <li style="font-weight: 700;"><a href="#">My Project</a></li>
+            <a href="contact.html" class="btn-contact" >Contact Me</a>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="project">
+            <h1>Add My Project</h1>
+            <form id="project-form">
+                <label for="project-name">Project Name</label>
+                    <input type="text" id="project-name" name="project-name" required>
+    
+                    <label for="start-date">Start Date</label>
+                    <input type="date" id="start-date" name="start-date" required>
+    
+                    <label for="end-date">End Date</label>
+                    <input type="date" id="end-date" name="end-date" required>
+    
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="5" required></textarea>
+    
+                    <label>Technologies</label>
+                    <div class="tech-stack">
+                        <label><input type="checkbox" name="tech" value="HTML"> HTML </label>
+                        <label><input type="checkbox" name="tech" value="CSS"> CSS </label>
+                        <label><input type="checkbox" name="tech" value="JS"> JS </label>
+                        <label><input type="checkbox" name="tech" value="TypeScript"> TypeScript </label>
+                    </div>
+
+                    <label for="image">Upload Image</label>
+                    <input type="file" id="image" name="image" accept="image/*">
+    
+                    <button type="submit">submit</button>
+            </form>
+        </div>
+
+        <section id="projects-list">
+            <h1>MY PROJECT</h1>
+            <div class="project-cards" id="projectCardsContainer">
+                <!-- Project cards will be dynamically inserted here -->
+            </div>
+        </section>
+    </main>
+
+    <script src="asset/js/project.js"></script>
+</body>
+</html>
