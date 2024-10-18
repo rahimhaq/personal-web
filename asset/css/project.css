@@ -154,6 +154,7 @@ button:hover {
   white-space: normal;  /* Memastikan teks ditampilkan dalam beberapa baris */
   max-width: 100%;  /* Memastikan lebar teks tidak melebihi container */
   margin: 0 auto; 
+  text-align: justify;
 }
 
 .project-card .actions {
