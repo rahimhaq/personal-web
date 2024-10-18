@@ -30,12 +30,12 @@ header {
 }
 
 .nav-contact {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-left:auto;
-    margin-right: 60px;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-left:auto;
+  margin-right: 60px;
+}
 
 .btn-contact {
     padding: 10px 20px;
