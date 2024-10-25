@@ -45,7 +45,7 @@ form.addEventListener('submit', function (e) {
     const newProject = `
         <div class="project-card" onclick="openProjectDetail('${projectName}', '${formatDate(startDate)}', '${formatDate(endDate)}', '${description}', '${technologies.join(', ')}', '${imageUrl}', '${calculateDuration(startDate, endDate)}')">
             <img src="${imageUrl}" alt="${projectName}">
-            <h3>${projectName} - ${formatDate(startDate)} to ${formatDate(endDate)}</h3>
+            <h3>${projectName}</h3>
             <p>${description}</p>
             <p><strong>Technologies:</strong> ${technologies.join(', ')}</p>
             <p><strong>Duration:</strong> ${calculateDuration(startDate, endDate)}</p>
