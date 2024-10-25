@@ -98,15 +98,3 @@ body {
   font-size: 18px;
   margin-top: 10px;
 }
-
-@media only screen and (max-width: 800px) {
-  .content {
-      flex-direction: column;
-  }
-}
-
-@media only screen and (max-width: 600px) {
-  .profile-card {
-      flex-direction: column;
-  }
-}
