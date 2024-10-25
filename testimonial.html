@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Testimonials</title>
+    <link rel="stylesheet" href="asset/css/nav.css" />
+    <link rel="stylesheet" href="asset/css/testimonial.css" />
+  </head>
+  <body>
+    <nav>
+      <ul style="flex-wrap: nowrap">
+        <li>
+          <img src="asset/img/dumbways.png" style="width: 70px" />
+        </li>
+        <li>
+          <a href="index.html" class="nav-links"> Home </a>
+        </li>
+        <li>
+          <a
+            href="project.html"
+            style="justify-content: space-between; white-space: nowrap"
+            class="nav-links"
+          >
+            My Project
+          </a>
+        </li>
+        <li style="font-weight: 700">
+          <a
+            href="testimonial.html"
+            style="justify-content: space-between; white-space: nowrap"
+            class="nav-links"
+          >
+            Testimonials
+          </a>
+        </li>
+
+        <li style="display: flex; justify-content: flex-end; width: 80%">
+          <a href="contact.html" class="btn-contact nav-links">Contact Me</a>
+          <div class="hamburger-menu" onclick="toggleMenu()">☰</div>
+        </li>
+      </ul>
+    </nav>
+
+    <div id="hamburger-container" class="hamburger-container hide">
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none" href="index.html">
+          Home
+        </a>
+      </h1>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none" href="project.html">
+          My Project
+        </a>
+      </h1>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none" href="contact.html">
+          Contact Me
+        </a>
+      </h1>
+      <h1 class="hamburger-container-item hamburger-active">
+        <a style="color: white; text-decoration: none" href="testimonial.html">
+          Testimonials
+        </a>
+      </h1>
+    </div>
+
+    <main>
+        <div class="testimonial-section">
+          <h1 style="margin-bottom: 20px;">My Testimonials</h1>
+          <h2 style="margin-bottom: 15px; font-weight: 100;">Rating By Star</h2>
+          <!--Filter Button-->
+          <div class="rating-filter">
+            <button onclick="filterByRating('all')" class="filter-btn">All</button>
+            <button onclick="filterByRating(1)" class="filter-btn">1★</button>
+            <button onclick="filterByRating(2)" class="filter-btn">2★</button>
+            <button onclick="filterByRating(3)" class="filter-btn">3★</button>
+            <button onclick="filterByRating(4)" class="filter-btn">4★</button>
+            <button onclick="filterByRating(5)" class="filter-btn">5★</button>
+          </div>
+          <div class="testimonials-container" id="testimonialsContainer">
+            <!-- Testimonials akan ditambahkan di sini melalui JavaScript -->
+          </div>
+        </div>
+      </main>
+
+      <script src="asset/js/testimonial.js"></script>
+      <script src="asset/js/nav.js"></script>
+  </body>
+</html>
