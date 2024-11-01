@@ -68,5 +68,5 @@ function openProjectDetail(name, startDate, endDate, description, techStack, ima
         imageUrl,
         duration
     }));
-    window.location.href = 'project-detail.html';  // Pindah ke halaman detail proyek
+    window.location.href = 'project-detail.hbs';  // Pindah ke halaman detail proyek
 }
