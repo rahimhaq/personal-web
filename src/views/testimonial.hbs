@@ -1,0 +1,96 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Testimonials</title>
+    <link rel="stylesheet" href="asset/css/nav.css" />
+    <link rel="stylesheet" href="asset/css/testimonial.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-left">
+        <img
+          src="/asset/img/dumbways.png"
+          alt="Dumbways Logo"
+          style="width: 70px;"
+        />
+        <a href="/" class="nav-button">Home</a>
+        <a href="/project" class="nav-button">Add Project</a>
+        <a href="/testimonial" class="nav-button" style="font-weight: 700">Testimonials</a>
+      </div>
+
+      <div class="navbar-right">
+        {{#if isLoggedIn}}
+          <span class="welcome-message">Selamat Datang, {{userName}}!</span>
+          <a href="/logout" class="nav-button">Logout</a>
+        {{else}}
+          <a href="/login" class="nav-button">Login</a>
+          <a href="/register" class="nav-button">Register</a>
+        {{/if}}
+        <a href="/contact" class="button">Contact Me</a>
+      </div>
+      <!-- Hamburger icon for mobile -->
+      <div class="hamburger-menu">
+        <i class="fas fa-bars" onclick="toggleHamburgerMenu()"></i>
+      </div>
+    </nav>
+
+    <!-- Hamburger menu container for mobile view -->
+    <div id="hamburger-container" class="hamburger-container hide">
+      <h1 class="hamburger-container-item hamburger-active">
+        <a style="color: white; text-decoration: none;" href="/"> Home </a>
+      </h1>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none;" href="/project">
+          Add Project
+        </a>
+      </h1>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none;" href="/contact">
+          Contact Me
+        </a>
+      </h1>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none" href="/testimonial">
+          Testimonials
+        </a>
+      </h1>
+      {{#unless isLoggedIn}}
+        <h1 class="hamburger-container-item">
+          <a style="color: #232946; text-decoration: none" href="/login">
+            Login
+          </a>
+        </h1>
+        <h1 class="hamburger-container-item">
+          <a style="color: #232946; text-decoration: none" href="/register">
+            Register
+          </a>
+        </h1>
+      {{/unless}}
+    </div>
+    <main>
+      <div class="testimonial-section">
+        <h1 style="margin-bottom: 20px;">My Testimonials</h1>
+        <h2 style="margin-bottom: 15px; font-weight: 100;">Rating By Star</h2>
+        <!--Filter Button-->
+        <div class="rating-filter">
+          <button
+            onclick="filterByRating('all')"
+            class="filter-btn"
+          >All</button>
+          <button onclick="filterByRating(1)" class="filter-btn">1★</button>
+          <button onclick="filterByRating(2)" class="filter-btn">2★</button>
+          <button onclick="filterByRating(3)" class="filter-btn">3★</button>
+          <button onclick="filterByRating(4)" class="filter-btn">4★</button>
+          <button onclick="filterByRating(5)" class="filter-btn">5★</button>
+        </div>
+        <div class="testimonials-container" id="testimonialsContainer">
+          <!-- Testimonials akan ditambahkan di sini melalui JavaScript -->
+        </div>
+      </div>
+    </main>
+
+    <script src="asset/js/testimonial.js"></script>
+    <script src="asset/js/nav.js"></script>
+  </body>
+</html>

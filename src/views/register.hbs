@@ -1,0 +1,86 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/asset/css/register.css" />
+    <link rel="stylesheet" href="/asset/css/nav.css" />
+    <title>Register</title>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-left">
+        <img
+          src="/asset/img/dumbways.png"
+          alt="Dumbways Logo"
+          style="width: 70px;"
+        />
+        <a href="/" class="nav-button">Home</a>
+        <a href="/project" class="nav-button">Add Project</a>
+        <a href="/testimonial" class="nav-button">Testimonials</a>
+      </div>
+
+      <div class="navbar-right">
+        {{#if isLoggedIn}}
+          <span class="welcome-message">Selamat Datang, {{username}}!</span>
+        {{else}}
+          <a href="/login" class="nav-button">Login</a>
+          <a href="/register" class="nav-button" style="font-weight: 700">Register</a>
+        {{/if}}
+        <a href="/contact" class="button">Contact Me</a>
+      </div>
+      <!-- Hamburger icon for mobile -->
+      <div class="hamburger-menu">
+        <i class="fas fa-bars" onclick="toggleHamburgerMenu()"></i>
+      </div>
+    </nav>
+
+    <!-- Hamburger menu container for mobile view -->
+    <div id="hamburger-container" class="hamburger-container hide">
+      <h1 class="hamburger-container-item hamburger-active">
+        <a style="color: white; text-decoration: none;" href="/"> Home </a>
+      </h1>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none;" href="/project">
+          Add Project
+        </a>
+      </h1>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none;" href="/contact">
+          Contact Me
+        </a>
+      </h1>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none" href="/testimonial">
+          Testimonials
+        </a>
+      </h1>
+      {{#unless isLoggedIn}}
+        <h1 class="hamburger-container-item">
+          <a style="color: #232946; text-decoration: none" href="/login">
+            Login
+          </a>
+        </h1>
+        <h1 class="hamburger-container-item">
+          <a style="color: #232946; text-decoration: none" href="/register">
+            Register
+          </a>
+        </h1>
+      {{/unless}}
+    </div>
+    <div class="form-container">
+      <h2>Register Your Account</h2>
+      <form action="/register" method="POST">
+        <input type="text" name="name" placeholder="Name" required />
+        <input type="email" name="email" placeholder="Email" required />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          required
+        />
+        <button type="submit">Register</button>
+      </form>
+      <p>Already have an account? <a href="/login">Login here</a></p>
+    </div>
+  </body>
+</html>

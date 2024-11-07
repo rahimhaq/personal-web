@@ -7,52 +7,45 @@
     <link rel="stylesheet" href="/asset/css/nav.css" />
   </head>
   <body>
-    <nav>
-      <ul style="flex-wrap: nowrap">
-        <li>
-          <img src="/asset/img/dumbways.png" style="width: 70px" />
-        </li>
-        <li>
-          <a href="/" class="nav-links"> Home </a>
-        </li>
-        <li style="font-weight: 700">
-          <a
-            href="/project"
-            style="justify-content: space-between; white-space: nowrap"
-            class="nav-links"
-          >
-            My Project
-          </a>
-        </li>
-        <li>
-          <a
-            href="/testimonial"
-            style="justify-content: space-between; white-space: nowrap"
-            class="nav-links"
-          >
-            Testimonials
-          </a>
-        </li>
-        <li style="display: flex; justify-content: flex-end; width: 80%">
-          <a href="/contact" class="btn-contact nav-links">Contact Me</a>
-          <div class="hamburger-menu" onclick="toggleMenu()">☰</div>
-        </li>
-      </ul>
+    <nav class="navbar">
+      <div class="navbar-left">
+        <img
+          src="/asset/img/dumbways.png"
+          alt="Dumbways Logo"
+          style="width: 70px;"
+        />
+        <a href="/" class="nav-button">Home</a>
+        <a href="/project" class="nav-button">Add Project</a>
+        <a href="/testimonial" class="nav-button">Testimonials</a>
+      </div>
+
+      <div class="navbar-right">
+        {{#if isLoggedIn}}
+          <span class="welcome-message">Selamat Datang, {{username}}!</span>
+        {{else}}
+          <a href="/login" class="nav-button">Login</a>
+          <a href="/register" class="nav-button">Register</a>
+        {{/if}}
+        <a href="/contact" class="button">Contact Me</a>
+      </div>
+      <!-- Hamburger icon for mobile -->
+      <div class="hamburger-menu">
+        <i class="fas fa-bars" onclick="toggleHamburgerMenu()"></i>
+      </div>
     </nav>
 
+    <!-- Hamburger menu container for mobile view -->
     <div id="hamburger-container" class="hamburger-container hide">
-      <h1 class="hamburger-container-item">
-        <a style="color: #232946; text-decoration: none" href="/">
-          Home
-        </a>
-      </h1>
       <h1 class="hamburger-container-item hamburger-active">
-        <a style="color: white; text-decoration: none" href="/project">
-          My Project
+        <a style="color: white; text-decoration: none;" href="/"> Home </a>
+      </h1>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none;" href="/project">
+          Add Project
         </a>
       </h1>
       <h1 class="hamburger-container-item">
-        <a style="color: #232946; text-decoration: none" href="/contact">
+        <a style="color: #232946; text-decoration: none;" href="/contact">
           Contact Me
         </a>
       </h1>
@@ -61,6 +54,18 @@
           Testimonials
         </a>
       </h1>
+      {{#unless isLoggedIn}}
+        <h1 class="hamburger-container-item">
+          <a style="color: #232946; text-decoration: none" href="/login">
+            Login
+          </a>
+        </h1>
+        <h1 class="hamburger-container-item">
+          <a style="color: #232946; text-decoration: none" href="/register">
+            Register
+          </a>
+        </h1>
+      {{/unless}}
     </div>
     <main>
         <section class="project-detail">

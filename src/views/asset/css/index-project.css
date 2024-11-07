@@ -20,7 +20,7 @@
 
 .project-card img {
   max-width: 100%;
-  height: 200px;
+  height: auto;
   object-fit: cover;
   border-radius: 10px;
 }
@@ -58,12 +58,12 @@
 }
 
 .project-card .edit-btn {
-  background-color: #ffc107;
+  background-color: #232946;
   color: white;
 }
 
 .project-card .delete-btn {
-  background-color: #dc3545;
+  background-color: #232946;
   color: white;
 }
 

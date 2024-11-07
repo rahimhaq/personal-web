@@ -1,0 +1,106 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Me</title>
+    <link rel="stylesheet" href="asset/css/contact.css" />
+    <link rel="stylesheet" href="asset/css/nav.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-left">
+        <img
+          src="/asset/img/dumbways.png"
+          alt="Dumbways Logo"
+          style="width: 70px;"
+        />
+        <a href="/" class="nav-button">Home</a>
+        <a href="/project" class="nav-button">Add Project</a>
+        <a href="/testimonial" class="nav-button">Testimonials</a>
+      </div>
+
+      <div class="navbar-right">
+        {{#if isLoggedIn}}
+          <span class="welcome-message">Selamat Datang, {{userName}}!</span>
+          <a href="/logout" class="nav-button">Logout</a>
+        {{else}}
+          <a href="/login" class="nav-button">Login</a>
+          <a href="/register" class="nav-button">Register</a>
+        {{/if}}
+        <a href="/contact" class="button">Contact Me</a>
+      </div>
+      <!-- Hamburger icon for mobile -->
+      <div class="hamburger-menu">
+        <i class="fas fa-bars" onclick="toggleHamburgerMenu()"></i>
+      </div>
+    </nav>
+
+    <!-- Hamburger menu container for mobile view -->
+    <div id="hamburger-container" class="hamburger-container hide">
+      <h1 class="hamburger-container-item hamburger-active">
+        <a style="color: white; text-decoration: none;" href="/"> Home </a>
+      </h1>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none;" href="/project">
+          Add Project
+        </a>
+      </h1>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none;" href="/contact">
+          Contact Me
+        </a>
+      </h1>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none" href="/testimonial">
+          Testimonials
+        </a>
+      </h1>
+      {{#unless isLoggedIn}}
+        <h1 class="hamburger-container-item">
+          <a style="color: #232946; text-decoration: none" href="/login">
+            Login
+          </a>
+        </h1>
+        <h1 class="hamburger-container-item">
+          <a style="color: #232946; text-decoration: none" href="/register">
+            Register
+          </a>
+        </h1>
+      {{/unless}}
+    </div>
+    <main>
+      <div class="container">
+        <h1>GET IN TOUCH</h1>
+        <form onsubmit="sendToMail(event)" action="#" method="post">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" />
+
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" />
+
+          <label for="phone">Phone Number</label>
+          <input type="text" id="phone" name="phone" />
+
+          <label for="subject">Subject</label>
+          <select id="subject" name="subject">
+            <option value="Full-Stack Developer">Full-Stack Developer</option>
+            <option value="DevOps Engineer">DevOps Engineer</option>
+            <option value="DevOps Engineer">Cyber Security</option>
+          </select>
+
+          <label for="message">Your Message</label>
+          <textarea id="message" name="message" rows="5"></textarea>
+
+          <button type="submit">submit</button>
+        </form>
+      </div>
+    </main>
+
+    <script src="asset/js/contact.js"></script>
+    <script src="asset/js/nav.js"></script>
+  </body>
+</html>

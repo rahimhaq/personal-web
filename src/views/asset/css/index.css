@@ -7,6 +7,7 @@
 
 body {
   background-color: #e0e5ec;
+  overflow-x: hidden;
 }
 
 .container {
@@ -56,6 +57,7 @@ body {
   border-radius: 25px;
   cursor: pointer;
   font-size: 16px;
+  text-decoration: none;
 }
 
 .download {

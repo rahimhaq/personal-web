@@ -1,0 +1,116 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css");
+
+nav {
+  display: flex auto;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  height: 75px;
+  padding: 0 20px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #fff;
+  width: 100%;
+  margin: 0;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.navbar-left a,
+.navbar-right a {
+  margin: 0 10px;
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 18px;
+  text-align: justify;
+}
+
+.navbar-right {
+  margin-left: auto; /* Pushes navbar-right to the far right */
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.welcome-message {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.button {
+  background-color: #232946;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  text-decoration: none;
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
+.nav-button {
+  color: #000;
+  white-space: nowrap;
+}
+
+/* Style untuk tombol hamburger */
+.hamburger-menu {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.hamburger-button {
+  display: none;
+}
+
+.hide {
+  display: none;
+}
+
+.hamburger-container {
+  background-color: #f4f3f3;
+}
+
+.hamburger-active {
+  background-color: #232946;
+}
+
+.hamburger-container-item {
+  width: 100%;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .nav-button {
+    display: none; /* Sembunyikan nav button pada layar kecil */
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .button {
+    display: none; /* Sembunyikan tombol "Contact Me" */
+  }
+
+  .hamburger-menu {
+    display: block;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+
+  /* Saat menu dibuka */
+  .nav-button.active {
+    display: flex;
+  }
+}
