@@ -13,7 +13,7 @@ const moment = require("moment");
 // Konfigurasi Multer untuk upload gambar
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "/src/views/uploads");
+    cb(null, "/views/uploads");
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
@@ -31,7 +31,6 @@ app.use("/views/uploads", express.static("/views/uploads"));
 
 // Middleware
 app.set("view engine", "hbs");
-app.set('views', path.join(__dirname, 'src', 'views'));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
