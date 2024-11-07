@@ -63,32 +63,31 @@ app.post("/login", async (req, res) => {
 
   try {
     // Cek apakah email ada di database
-    const result = await pool.query("SELECT * FROM tb_users WHERE email = $1", [
-      email,
-    ]);
+    const result = await pool.query("SELECT * FROM tb_users WHERE email = $1", [email]);
     const user = result.rows[0];
 
     if (user) {
       // Jika email ditemukan, periksa password
-      const isMatch = bcrypt.compareSync(password, user.password);
+      const isMatch = await bcrypt.compare(password, user.password);
       if (isMatch) {
         // Jika password cocok, simpan userId ke session dan redirect ke halaman utama
         req.session.userId = user.id;
         req.session.userName = user.name; // Menyimpan nama user untuk ditampilkan di halaman utama
-        return res.redirect("/");
+        return res.redirect("/"); // Halaman utama setelah login berhasil
       } else {
         // Password salah
         return res.redirect("/login?error=Email/Password salah.");
       }
     } else {
       // Email tidak ditemukan
-      return res.redirect("/login?error=Email/Password salah.");
+      return res.redirect("/login?error=Email tidak ditemukan.");
     }
   } catch (err) {
     console.error(err.message);
     res.redirect("/login?error=Terjadi kesalahan pada server");
   }
 });
+
 
 // Route GET halaman register
 app.get("/register", (req, res) => {
