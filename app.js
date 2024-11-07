@@ -161,7 +161,7 @@ app.get('/', async (req, res) => {
     `);
 
     // Kirim data proyek ke template index.hbs
-    res.render('index', { projects: result.rows, isLoggedIn: req.session.isLoggedIn, username: req.session.username });
+    res.render('index', { projects: result.rows, isLoggedIn: req.session.isLoggedIn, userName: req.session.userName });
   } catch (err) {
     console.error('Error fetching projects:', err);
     res.status(500).send('Internal Server Error');
