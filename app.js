@@ -37,7 +37,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(
   session({
-    secret: "secret-key",
+    secret: "hariiniadalahbukankemarin",
     resave: false,
     saveUninitialized: false,
   })
@@ -53,9 +53,13 @@ function isAuthenticated(req, res, next) {
 }
 
 // Route GET halaman login
-app.get("/login", (req, res) => {
-  res.render("login", { error: req.query.error });
+app.get('/login', (req, res) => {
+  if (req.session.userId) {
+    return res.redirect('/'); // Redirect ke home jika sudah login
+  }
+  res.render('login', { error: req.query.error });
 });
+
 
 // Login logic
 app.post("/login", async (req, res) => {
@@ -63,7 +67,9 @@ app.post("/login", async (req, res) => {
 
   try {
     // Cek apakah email ada di database
-    const result = await pool.query("SELECT * FROM tb_users WHERE email = $1", [email]);
+    const result = await pool.query("SELECT * FROM tb_users WHERE email = $1", [
+      email,
+    ]);
     const user = result.rows[0];
 
     if (user) {
@@ -73,21 +79,20 @@ app.post("/login", async (req, res) => {
         // Jika password cocok, simpan userId ke session dan redirect ke halaman utama
         req.session.userId = user.id;
         req.session.userName = user.name; // Menyimpan nama user untuk ditampilkan di halaman utama
-        return res.redirect("/"); // Halaman utama setelah login berhasil
+        return res.redirect("/");
       } else {
         // Password salah
         return res.redirect("/login?error=Email/Password salah.");
       }
     } else {
       // Email tidak ditemukan
-      return res.redirect("/login?error=Email tidak ditemukan.");
+      return res.redirect("/login?error=Email/Password salah.");
     }
   } catch (err) {
     console.error(err.message);
     res.redirect("/login?error=Terjadi kesalahan pada server");
   }
 });
-
 
 // Route GET halaman register
 app.get("/register", (req, res) => {
@@ -138,6 +143,11 @@ app.get("/", isAuthenticated, async (req, res) => {
 });
 
 app.get('/', async (req, res) => {
+  if (!req.session.userId) {
+    // Jika pengguna belum login, arahkan ke halaman login
+    return res.redirect('/login');
+  }
+  
   try {
     // Query JOIN untuk mengambil proyek dengan author
     const result = await pool.query(`
