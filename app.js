@@ -13,7 +13,7 @@ const moment = require("moment");
 // Konfigurasi Multer untuk upload gambar
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "/views/uploads");
+    cb(null, "views/uploads");
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
@@ -26,15 +26,14 @@ app.use("/asset/css", express.static("asset/css"));
 app.use("/asset/cv", express.static("asset/cv"));
 app.use("/asset/img", express.static("asset/img"));
 app.use("/asset/js", express.static("asset/js"));
-app.use("/views", express.static("/views"));
-app.use("/views/uploads", express.static("/views/uploads"));
+app.use("/views", express.static("views"));
+app.use("/views/uploads", express.static("views/uploads"));
 
 // Middleware
 app.set("view engine", "hbs");
-
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(
   session({
     secret: "secret-key",
@@ -101,20 +100,20 @@ app.post("/register", async (req, res) => {
 
   try {
     // Cek apakah email sudah digunakan
-    const existingUser = await pool.query(
-      "SELECT * FROM tb_users WHERE email = $1",
-      [email]
-    );
+    const existingUser = await pool.query("SELECT * FROM tb_users WHERE email = $1", [
+      email,
+    ]);
     if (existingUser.rows.length > 0) {
       return res.redirect("/register?error=Email sudah terdaftar.");
     }
 
     // Hash password dan simpan user baru ke database
     const hashedPassword = bcrypt.hashSync(password, 10);
-    await pool.query(
-      "INSERT INTO tb_users (name, email, password) VALUES ($1, $2, $3)",
-      [name, email, hashedPassword]
-    );
+    await pool.query("INSERT INTO tb_users (name, email, password) VALUES ($1, $2, $3)", [
+      name,
+      email,
+      hashedPassword,
+    ]);
 
     res.redirect("/login");
   } catch (err) {
@@ -126,13 +125,11 @@ app.post("/register", async (req, res) => {
 // Route GET halaman utama dengan proteksi autentikasi
 app.get("/", isAuthenticated, async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT * FROM tb_projects ORDER BY id DESC"
-    );
-    res.render("index", {
+    const result = await pool.query("SELECT * FROM tb_projects ORDER BY id DESC");
+    res.render("index", { 
       projects: result.rows,
       isLoggedIn: req.session.userId ? true : false,
-      userName: req.session.userName, // Menampilkan nama pengguna di halaman utama
+      userName: req.session.userName // Menampilkan nama pengguna di halaman utama
     });
   } catch (err) {
     console.error(err.message);
@@ -140,36 +137,42 @@ app.get("/", isAuthenticated, async (req, res) => {
   }
 });
 
-app.get("/", async (req, res) => {
+app.get('/', async (req, res) => {
   try {
+    // Query JOIN untuk mengambil proyek dengan author
     const result = await pool.query(`
-      SELECT p.id, p.name, p.description, p.start_date, p.end_date, p.technologies, p.image, u.name AS author_name
-      FROM tb_projects p
-      JOIN tb_users u ON p.author_id = u.id
-      ORDER BY p.id DESC
+      SELECT 
+        p.id AS project_id, 
+        p.name AS project_name, 
+        p.description, 
+        p.start_date, 
+        p.end_date, 
+        u.name AS author, 
+        p.technologies, 
+        p.image
+      FROM 
+        tb_projects p
+      INNER JOIN 
+        tb_users u 
+      ON 
+        p.author_id = u.id
+      ORDER BY 
+        p.id DESC;
     `);
 
-    const projects = result.rows.map((project) => ({
-      ...project,
-      start_date: moment(project.start_date).format("DD MMM YYYY"), // Format tanggal
-      end_date: moment(project.end_date).format("DD MMM YYYY"),
-      duration: moment(project.end_date).diff(
-        moment(project.start_date),
-        "days"
-      ), // Hitung durasi (dalam hari)
-    }));
-
-    res.render("index", { projects });
+    // Kirim data proyek ke template index.hbs
+    res.render('index', { projects: result.rows, isLoggedIn: req.session.isLoggedIn, username: req.session.username });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Internal Server Error");
+    console.error('Error fetching projects:', err);
+    res.status(500).send('Internal Server Error');
   }
 });
+
 
 app.get("/testimonial", isAuthenticated, (req, res) => {
   res.render("testimonial", {
     isLoggedIn: req.session.userId ? true : false,
-    userName: req.session.userName, // Kirimkan nama pengguna
+    userName: req.session.userName  // Kirimkan nama pengguna
   });
 });
 
@@ -189,9 +192,9 @@ app.get("/logout", (req, res) => {
 app.get("/project", isAuthenticated, async (req, res) => {
   try {
     // Data proyek bisa disesuaikan dengan kebutuhan Anda
-    res.render("project", {
+    res.render("project", { 
       isLoggedIn: req.session.userId ? true : false,
-      userName: req.session.userName, // Kirimkan nama pengguna
+      userName: req.session.userName  // Kirimkan nama pengguna
     });
   } catch (err) {
     console.error(err.message);
@@ -199,13 +202,12 @@ app.get("/project", isAuthenticated, async (req, res) => {
   }
 });
 
+
 // Menampilkan Detail Proyek Berdasarkan ID
 app.get("/project-detail/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query("SELECT * FROM tb_projects WHERE id = $1", [
-      id,
-    ]);
+    const result = await pool.query("SELECT * FROM tb_projects WHERE id = $1", [id]);
     const project = result.rows[0];
     res.render("project-detail", { project });
   } catch (err) {
@@ -218,9 +220,7 @@ app.post("/project", upload.single("image"), async (req, res) => {
   const { name, description } = req.body;
   const start_date = moment(req.body.start_date).format("YYYY-MM-DD");
   const end_date = moment(req.body.end_date).format("YYYY-MM-DD");
-  const technologies = Array.isArray(req.body.technologies)
-    ? req.body.technologies
-    : [req.body.technologies];
+  const technologies = Array.isArray(req.body.technologies) ? req.body.technologies : [req.body.technologies];
   const image = req.file ? req.file.filename : null;
 
   try {
@@ -240,9 +240,7 @@ app.post("/project", upload.single("image"), async (req, res) => {
 app.get("/edit-project/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query("SELECT * FROM tb_projects WHERE id = $1", [
-      id,
-    ]);
+    const result = await pool.query("SELECT * FROM tb_projects WHERE id = $1", [id]);
     const project = result.rows[0];
     res.render("edit-project", { project, id });
   } catch (err) {
@@ -254,9 +252,7 @@ app.get("/edit-project/:id", async (req, res) => {
 app.post("/edit-project/:id", upload.single("image"), async (req, res) => {
   const { id } = req.params;
   const { name, start_date, end_date, description } = req.body;
-  const technologies = Array.isArray(req.body.technologies)
-    ? req.body.technologies
-    : [req.body.technologies];
+  const technologies = Array.isArray(req.body.technologies) ? req.body.technologies : [req.body.technologies];
   const image = req.file ? req.file.filename : null;
 
   try {
