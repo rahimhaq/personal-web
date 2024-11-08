@@ -13,7 +13,7 @@ const moment = require("moment");
 // Konfigurasi Multer untuk upload gambar
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "views/uploads");
+    cb(null, "public/uploads");
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
@@ -27,7 +27,7 @@ app.use("/asset/cv", express.static("asset/cv"));
 app.use("/asset/img", express.static("asset/img"));
 app.use("/asset/js", express.static("asset/js"));
 app.use("/views", express.static("views"));
-app.use("/views/uploads", express.static("views/uploads"));
+app.use("/public/uploads", express.static("public/uploads"));
 
 // Middleware
 app.set("view engine", "hbs");
@@ -35,13 +35,23 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.use(
   session({
+    store: new pgSession({
+      pool, // Pool PostgreSQL Anda
+      tableName: 'user_sessions' // Nama tabel untuk menyimpan session
+    }),
     secret: "hariiniadalahbukankemarin",
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 hari
+      secure: false, // Set `true` jika menggunakan HTTPS di production
+    }
   })
 );
+
 
 // Middleware untuk proteksi halaman yang membutuhkan login
 function isAuthenticated(req, res, next) {
@@ -89,7 +99,7 @@ app.post("/login", async (req, res) => {
       return res.redirect("/login?error=Email/Password salah.");
     }
   } catch (err) {
-    console.error(err.message);
+    console.error("Login error:", err);
     res.redirect("/login?error=Terjadi kesalahan pada server");
   }
 });
@@ -127,29 +137,10 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Route GET halaman utama dengan proteksi autentikasi
+// Route GET halaman utama dengan proteksi autentikasi dan relasi ke tb_users
 app.get("/", isAuthenticated, async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM tb_projects ORDER BY id DESC");
-    res.render("index", { 
-      projects: result.rows,
-      isLoggedIn: req.session.userId ? true : false,
-      userName: req.session.userName // Menampilkan nama pengguna di halaman utama
-    });
-  } catch (err) {
-    console.error(err.message);
-    res.redirect("/login?error=Terjadi kesalahan pada server");
-  }
-});
-
-app.get('/', async (req, res) => {
-  if (!req.session.userId) {
-    // Jika pengguna belum login, arahkan ke halaman login
-    return res.redirect('/login');
-  }
-  
-  try {
-    // Query JOIN untuk mengambil proyek dengan author
+    // Query JOIN untuk mengambil proyek beserta informasi penulisnya
     const result = await pool.query(`
       SELECT 
         p.id AS project_id, 
@@ -170,14 +161,17 @@ app.get('/', async (req, res) => {
         p.id DESC;
     `);
 
-    // Kirim data proyek ke template index.hbs
-    res.render('index', { projects: result.rows, isLoggedIn: req.session.isLoggedIn, userName: req.session.userName });
+    // Kirim data proyek dan status login ke template index.hbs
+    res.render("index", { 
+      projects: result.rows, 
+      isLoggedIn: !!req.session.userId, 
+      userName: req.session.userName 
+    });
   } catch (err) {
-    console.error('Error fetching projects:', err);
-    res.status(500).send('Internal Server Error');
+    console.error("Error fetching projects:", err);
+    res.status(500).send("Internal Server Error");
   }
 });
-
 
 app.get("/testimonial", isAuthenticated, (req, res) => {
   res.render("testimonial", {
