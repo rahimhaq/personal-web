@@ -1,10 +1,15 @@
 // db.js
 const { Sequelize } = require('sequelize');
+require("dotenv").config(); // Memuat file .env
 
-const sequelize = new Sequelize('personalweb', 'postgres', '01Mei2002', {
-  host: 'localhost',
-  dialect: 'postgres', // Tambahkan dialect PostgreSQL
-  port: 5432
-});
-
+const sequelize = new Sequelize(
+  process.env.POSTGRES_DATABASE,
+  process.env.POSTGRES_USER,
+  process.env.POSTGRES_PASSWORD,
+  {
+    host: process.env.POSTGRES_HOST,
+    dialect: "postgres", // Pastikan menggunakan dialect PostgreSQL
+    port: 5432, // Pastikan port PostgreSQL sesuai
+  }
+);
 module.exports = sequelize;

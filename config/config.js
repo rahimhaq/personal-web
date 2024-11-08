@@ -1,5 +1,5 @@
-require("dotenv").config();
-const pg = require("pg");
+require("dotenv").config(); // Memuat variabel lingkungan dari .env
+const pg = require("pg"); // Mengimpor pg (PostgreSQL client)
 
 module.exports = {
   "development": {

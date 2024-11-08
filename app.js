@@ -1,8 +1,6 @@
 const express = require("express");
 const session = require("express-session");
-const { Sequelize, DataTypes } = require("sequelize");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
-const config = require("./config/config");
 const path = require("path");
 const bcrypt = require("bcrypt");
 const multer = require("multer");
@@ -12,9 +10,12 @@ const moment = require("moment");
 
 // Ambil environment yang dipilih
 require("dotenv").config()
+const { Sequelize, DataTypes } = require("sequelize");
+const config = require("./config/config");
 const environment = process.env.NODE_ENV || "development";
 const dbConfig = config[environment];
 const sequelize = new Sequelize(dbConfig);
+module.exports = sequelize; // Ekspor sequelize untuk digunakan di bagian lain
 
 // Model untuk tabel users
 const User = sequelize.define("User", {
