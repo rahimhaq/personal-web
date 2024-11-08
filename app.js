@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require('path');
+const config = require("./config/config")
 const bcrypt = require("bcrypt");
 const multer = require("multer"); // Untuk upload gambar
 const pool = require("./db"); // Mengimpor koneksi database dari db.js
@@ -9,6 +10,7 @@ const pgSession = require("connect-pg-simple")(session);
 const app = express();
 const port = 3000;
 const moment = require("moment");
+const { Sequelize } = require("sequelize");
 
 // Konfigurasi Multer untuk upload gambar
 const storage = multer.diskStorage({
@@ -20,6 +22,11 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage: storage });
+
+require("dotenv").config()
+
+const environment = process.env.NODE_ENV
+const sequelize = new Sequelize(config[environment]);
 
 // Static files
 app.use("/asset/css", express.static("asset/css"));
