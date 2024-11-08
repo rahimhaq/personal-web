@@ -1,9 +1,7 @@
 const express = require("express");
 const session = require("express-session");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
-const path = require("path");
 const bcrypt = require("bcrypt");
-const multer = require("multer");
 const app = express();
 const port = 3000;
 const moment = require("moment");
@@ -39,16 +37,35 @@ const Project = sequelize.define("Project", {
 User.hasMany(Project, { foreignKey: "author_id" });
 Project.belongsTo(User, { foreignKey: "author_id" });
 
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
+
+// Tentukan path ke folder uploads
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
+
+// Periksa apakah folder uploads ada
+if (!fs.existsSync(uploadsDir)) {
+  // Jika folder belum ada, buat folder uploads
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log('Folder uploads berhasil dibuat.');
+} else {
+  console.log('Folder uploads sudah ada.');
+}
+
 // Konfigurasi Multer untuk upload gambar
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "public/uploads");
+    cb(null, uploadsDir);  // Menggunakan uploadsDir yang telah diverifikasi
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
+    cb(null, Date.now() + "-" + file.originalname);  // Nama file yang diubah menjadi unik
   },
 });
+
 const upload = multer({ storage: storage });
+
+module.exports = upload;  // Ekspor objek upload untuk digunakan di route
 
 // Konfigurasi session store menggunakan Sequelize
 const sessionStore = new SequelizeStore({
@@ -64,13 +81,13 @@ app.use(
     saveUninitialized: false,
     cookie: {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 hari
-      secure: false, // Set `true` jika menggunakan HTTPS di production
+      secure: process.env.NODE_ENV === 'production',
     },
   })
 );
 
 // Static files
-app.use("/asset", express.static(path.join(__dirname, "./assset")))
+app.use("/asset", express.static(path.join(__dirname, "asset")))
 app.use("/asset/css", express.static("asset/css"));
 app.use("/asset/cv", express.static("asset/cv"));
 app.use("/asset/img", express.static("asset/img"));
@@ -248,3 +265,5 @@ app.listen(port, async () => {
   await sequelize.sync(); // Sinkronisasi Sequelize dengan database
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+module.exports = app; // Ekspor aplikasi Express
