@@ -69,6 +69,7 @@ app.use(
 );
 
 // Static files
+app.use("/asset", express.static(path.join(__dirname, "./assset")))
 app.use("/asset/css", express.static("asset/css"));
 app.use("/asset/cv", express.static("asset/cv"));
 app.use("/asset/img", express.static("asset/img"));
