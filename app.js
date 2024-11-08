@@ -1,16 +1,42 @@
 const express = require("express");
-const path = require('path');
-const config = require("./config/config")
-const bcrypt = require("bcrypt");
-const multer = require("multer"); // Untuk upload gambar
-const pool = require("./db"); // Mengimpor koneksi database dari db.js
 const session = require("express-session");
-const { Pool } = require("pg");
-const pgSession = require("connect-pg-simple")(session);
+const { Sequelize, DataTypes } = require("sequelize");
+const SequelizeStore = require("connect-session-sequelize")(session.Store);
+const config = require("./config/config");
+const path = require("path");
+const bcrypt = require("bcrypt");
+const multer = require("multer");
 const app = express();
 const port = 3000;
 const moment = require("moment");
-const { Sequelize } = require("sequelize");
+
+// Ambil environment yang dipilih
+require("dotenv").config()
+const environment = process.env.NODE_ENV || "development";
+const dbConfig = config[environment];
+const sequelize = new Sequelize(dbConfig);
+
+// Model untuk tabel users
+const User = sequelize.define("User", {
+  name: { type: DataTypes.STRING, allowNull: false },
+  email: { type: DataTypes.STRING, unique: true, allowNull: false },
+  password: { type: DataTypes.STRING, allowNull: false },
+});
+
+// Model untuk tabel projects
+const Project = sequelize.define("Project", {
+  name: { type: DataTypes.STRING, allowNull: false },
+  description: DataTypes.TEXT,
+  start_date: DataTypes.DATE,
+  end_date: DataTypes.DATE,
+  technologies: DataTypes.ARRAY(DataTypes.STRING),
+  image: DataTypes.STRING,
+  author_id: { type: DataTypes.INTEGER, allowNull: false },
+});
+
+// Relasi antar tabel
+User.hasMany(Project, { foreignKey: "author_id" });
+Project.belongsTo(User, { foreignKey: "author_id" });
 
 // Konfigurasi Multer untuk upload gambar
 const storage = multer.diskStorage({
@@ -23,10 +49,24 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-require("dotenv").config()
+// Konfigurasi session store menggunakan Sequelize
+const sessionStore = new SequelizeStore({
+  db: sequelize,
+  tableName: "user_sessions",
+});
 
-const environment = process.env.NODE_ENV
-const sequelize = new Sequelize(config[environment]);
+app.use(
+  session({
+    store: sessionStore,
+    secret: "hariiniadalahbukankemarin",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 hari
+      secure: false, // Set `true` jika menggunakan HTTPS di production
+    },
+  })
+);
 
 // Static files
 app.use("/asset/css", express.static("asset/css"));
@@ -38,27 +78,10 @@ app.use("/public/uploads", express.static("public/uploads"));
 
 // Middleware
 app.set("view engine", "hbs");
-app.set('views', path.join(__dirname, 'views'));
+app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use(
-  session({
-    store: new pgSession({
-      pool, // Pool PostgreSQL Anda
-      tableName: 'user_sessions' // Nama tabel untuk menyimpan session
-    }),
-    secret: "hariiniadalahbukankemarin",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 hari
-      secure: false, // Set `true` jika menggunakan HTTPS di production
-    }
-  })
-);
-
+app.use(express.static(path.join(__dirname, "public")));
 
 // Middleware untuk proteksi halaman yang membutuhkan login
 function isAuthenticated(req, res, next) {
@@ -70,39 +93,25 @@ function isAuthenticated(req, res, next) {
 }
 
 // Route GET halaman login
-app.get('/login', (req, res) => {
+app.get("/login", (req, res) => {
   if (req.session.userId) {
-    return res.redirect('/'); // Redirect ke home jika sudah login
+    return res.redirect("/");
   }
-  res.render('login', { error: req.query.error });
+  res.render("login", { error: req.query.error });
 });
-
 
 // Login logic
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Cek apakah email ada di database
-    const result = await pool.query("SELECT * FROM tb_users WHERE email = $1", [
-      email,
-    ]);
-    const user = result.rows[0];
+    const user = await User.findOne({ where: { email } });
 
-    if (user) {
-      // Jika email ditemukan, periksa password
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (isMatch) {
-        // Jika password cocok, simpan userId ke session dan redirect ke halaman utama
-        req.session.userId = user.id;
-        req.session.userName = user.name; // Menyimpan nama user untuk ditampilkan di halaman utama
-        return res.redirect("/");
-      } else {
-        // Password salah
-        return res.redirect("/login?error=Email/Password salah.");
-      }
+    if (user && bcrypt.compareSync(password, user.password)) {
+      req.session.userId = user.id;
+      req.session.userName = user.name;
+      return res.redirect("/");
     } else {
-      // Email tidak ditemukan
       return res.redirect("/login?error=Email/Password salah.");
     }
   } catch (err) {
@@ -121,21 +130,14 @@ app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
-    // Cek apakah email sudah digunakan
-    const existingUser = await pool.query("SELECT * FROM tb_users WHERE email = $1", [
-      email,
-    ]);
-    if (existingUser.rows.length > 0) {
+    const existingUser = await User.findOne({ where: { email } });
+
+    if (existingUser) {
       return res.redirect("/register?error=Email sudah terdaftar.");
     }
 
-    // Hash password dan simpan user baru ke database
     const hashedPassword = bcrypt.hashSync(password, 10);
-    await pool.query("INSERT INTO tb_users (name, email, password) VALUES ($1, $2, $3)", [
-      name,
-      email,
-      hashedPassword,
-    ]);
+    await User.create({ name, email, password: hashedPassword });
 
     res.redirect("/login");
   } catch (err) {
@@ -144,35 +146,18 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Route GET halaman utama dengan proteksi autentikasi dan relasi ke tb_users
+// Route GET halaman utama dengan proteksi autentikasi
 app.get("/", isAuthenticated, async (req, res) => {
   try {
-    // Query JOIN untuk mengambil proyek beserta informasi penulisnya
-    const result = await pool.query(`
-      SELECT 
-        p.id AS project_id, 
-        p.name AS project_name, 
-        p.description, 
-        p.start_date, 
-        p.end_date, 
-        u.name AS author, 
-        p.technologies, 
-        p.image
-      FROM 
-        tb_projects p
-      INNER JOIN 
-        tb_users u 
-      ON 
-        p.author_id = u.id
-      ORDER BY 
-        p.id DESC;
-    `);
+    const projects = await Project.findAll({
+      include: [{ model: User, attributes: ["name"] }],
+      order: [["id", "DESC"]],
+    });
 
-    // Kirim data proyek dan status login ke template index.hbs
-    res.render("index", { 
-      projects: result.rows, 
-      isLoggedIn: !!req.session.userId, 
-      userName: req.session.userName 
+    res.render("index", {
+      projects,
+      isLoggedIn: !!req.session.userId,
+      userName: req.session.userName,
     });
   } catch (err) {
     console.error("Error fetching projects:", err);
@@ -182,8 +167,8 @@ app.get("/", isAuthenticated, async (req, res) => {
 
 app.get("/testimonial", isAuthenticated, (req, res) => {
   res.render("testimonial", {
-    isLoggedIn: req.session.userId ? true : false,
-    userName: req.session.userName  // Kirimkan nama pengguna
+    isLoggedIn: !!req.session.userId,
+    userName: req.session.userName,
   });
 });
 
@@ -200,46 +185,44 @@ app.get("/logout", (req, res) => {
   });
 });
 
-app.get("/project", isAuthenticated, async (req, res) => {
-  try {
-    // Data proyek bisa disesuaikan dengan kebutuhan Anda
-    res.render("project", { 
-      isLoggedIn: req.session.userId ? true : false,
-      userName: req.session.userName  // Kirimkan nama pengguna
-    });
-  } catch (err) {
-    console.error(err.message);
-    res.redirect("/login?error=Terjadi kesalahan pada server");
-  }
+app.get("/project", isAuthenticated, (req, res) => {
+  res.render("project", {
+    isLoggedIn: !!req.session.userId,
+    userName: req.session.userName,
+  });
 });
 
-
-// Menampilkan Detail Proyek Berdasarkan ID
 app.get("/project-detail/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query("SELECT * FROM tb_projects WHERE id = $1", [id]);
-    const project = result.rows[0];
+    const project = await Project.findByPk(id, {
+      include: [{ model: User, attributes: ["name"] }],
+    });
     res.render("project-detail", { project });
   } catch (err) {
     console.error(err.message);
   }
 });
 
-// Menambah Proyek Baru
 app.post("/project", upload.single("image"), async (req, res) => {
   const { name, description } = req.body;
-  const start_date = moment(req.body.start_date).format("YYYY-MM-DD");
-  const end_date = moment(req.body.end_date).format("YYYY-MM-DD");
-  const technologies = Array.isArray(req.body.technologies) ? req.body.technologies : [req.body.technologies];
+  const start_date = moment(req.body.start_date).toDate();
+  const end_date = moment(req.body.end_date).toDate();
+  const technologies = Array.isArray(req.body.technologies)
+    ? req.body.technologies
+    : [req.body.technologies];
   const image = req.file ? req.file.filename : null;
 
   try {
-    await pool.query(
-      `INSERT INTO tb_projects (name, start_date, end_date, description, technologies, image)
-       VALUES ($1, $2, $3, $4, $5::varchar[], $6)`,
-      [name, start_date, end_date, description, technologies, image]
-    );
+    await Project.create({
+      name,
+      description,
+      start_date,
+      end_date,
+      technologies,
+      image,
+      author_id: req.session.userId,
+    });
     res.redirect("/");
   } catch (err) {
     console.error("Error adding project:", err.message);
@@ -247,51 +230,19 @@ app.post("/project", upload.single("image"), async (req, res) => {
   }
 });
 
-// Menampilkan Halaman Edit Proyek Berdasarkan ID
-app.get("/edit-project/:id", async (req, res) => {
-  const { id } = req.params;
-  try {
-    const result = await pool.query("SELECT * FROM tb_projects WHERE id = $1", [id]);
-    const project = result.rows[0];
-    res.render("edit-project", { project, id });
-  } catch (err) {
-    console.error(err.message);
-  }
-});
-
-// Memperbarui Proyek Berdasarkan ID
-app.post("/edit-project/:id", upload.single("image"), async (req, res) => {
-  const { id } = req.params;
-  const { name, start_date, end_date, description } = req.body;
-  const technologies = Array.isArray(req.body.technologies) ? req.body.technologies : [req.body.technologies];
-  const image = req.file ? req.file.filename : null;
-
-  try {
-    await pool.query(
-      `UPDATE tb_projects SET name = $1, start_date = $2, end_date = $3, description = $4, technologies = $5::varchar[], image = $6 WHERE id = $7`,
-      [name, start_date, end_date, description, technologies, image, id]
-    );
-    res.redirect("/");
-  } catch (err) {
-    console.error("Error updating project:", err.message);
-    res.status(500).send("Error updating project");
-  }
-});
-
-// Menghapus Proyek Berdasarkan ID
 app.post("/delete-project/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    await pool.query("DELETE FROM tb_projects WHERE id = $1", [id]);
-    res.redirect("/"); // Arahkan kembali ke halaman utama setelah menghapus
+    await Project.destroy({ where: { id } });
+    res.redirect("/");
   } catch (err) {
     console.error("Error deleting project:", err.message);
     res.status(500).send("Error deleting project");
   }
 });
 
-// Menjalankan Server
-app.listen(port, () => {
+app.listen(port, async () => {
+  await sequelize.sync(); // Sinkronisasi Sequelize dengan database
   console.log(`Server is running on http://localhost:${port}`);
 });
