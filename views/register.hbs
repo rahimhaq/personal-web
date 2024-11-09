@@ -14,14 +14,14 @@
           alt="Dumbways Logo"
           style="width: 70px;"
         />
-        <a href="/" class="nav-button">Home</a>
+        {{!-- <a href="/" class="nav-button">Home</a>
         <a href="/project" class="nav-button">Add Project</a>
-        <a href="/testimonial" class="nav-button">Testimonials</a>
+        <a href="/testimonial" class="nav-button">Testimonials</a> --}}
       </div>
 
       <div class="navbar-right">
         {{#if isLoggedIn}}
-          <span class="welcome-message">Selamat Datang, {{username}}!</span>
+          <span class="welcome-message">Welcome, {{username}}!</span>
         {{else}}
           <a href="/login" class="nav-button">Login</a>
           <a href="/register" class="nav-button" style="font-weight: 700">Register</a>

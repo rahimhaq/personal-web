@@ -26,7 +26,7 @@
 
       <div class="navbar-right">
         {{#if isLoggedIn}}
-          <span class="welcome-message">Selamat Datang, {{userName}}!</span>
+          <span class="welcome-message">Welcome, {{userName}}!</span>
           <a href="/logout" class="nav-button">Logout</a>
         {{else}}
           <a href="/login" class="nav-button">Login</a>
@@ -129,12 +129,10 @@
                 alt="{{name}}"
                 class="project-image"
               />
-              <h2>{{name}}</h2>
-              <p><strong>Start Date:</strong> {{start_date}}</p>
-              <p><strong>End Date:</strong> {{end_date}}</p>
-              <p><strong>Duration:</strong> {{duration}} days</p>
-              <p><strong>Technologies:</strong> {{technologies}}</p>
-              <p><strong>Author:</strong> {{author}}</p>
+              <h2>{{this.name}}</h2>
+              <p><strong>Duration:</strong> {{this.duration}} days</p>
+              <p><strong>Technologies:</strong> {{this.technologies}}</p>
+              <p><strong>Author:</strong> {{this.authorName}}</p>
               <!-- Tombol Edit dan Delete -->
               <button
                 onclick="window.location.href='/edit-project/{{this.id}}'"

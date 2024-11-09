@@ -3,19 +3,28 @@ const pg = require("pg"); // Mengimpor pg (PostgreSQL client)
 
 module.exports = {
   "development": {
-    "use_env_variable": "DATABASE_URL",
+    "username": process.env.POSTGRES_USER,
+    "password": process.env.POSTGRES_PASSWORD,
+    "database": process.env.POSTGRES_DATABASE,
+    "host": process.env.POSTGRES_HOST,
     "dialect": "postgres",
-    "dialectModule" : pg,
+    dialectModule : pg,
+    dialectOptions: {
+      ssl: false
+    },
   },
   "production": {
-    "use_env_variable": "DATABASE_URL",
+    "username": process.env.POSTGRES_USER,
+    "password": process.env.POSTGRES_PASSWORD,
+    "database": process.env.POSTGRES_DATABASE,
+    "host": process.env.POSTGRES_HOST,
     "dialect": "postgres",
-    "dialectModule" : pg,
-    "dialectOptions": {
+    dialectModule : pg,
+    dialectOptions: {
       ssl: {
         require: true,
         rejectUnauthorized: false,
       },
     },
   },
-};
+}

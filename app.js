@@ -5,6 +5,9 @@ const bcrypt = require("bcrypt");
 const app = express();
 const port = 3000;
 const moment = require("moment");
+const hbs = require("hbs");
+hbs.registerHelper("includes", (array, value) => array && array.includes(value));
+
 
 // Ambil environment yang dipilih
 require("dotenv").config()
@@ -173,8 +176,20 @@ app.get("/", isAuthenticated, async (req, res) => {
       order: [["id", "DESC"]],
     });
 
+    const projectsWithAuthorAndDuration = projects.map((project) => {
+      const startDate = moment(project.start_date);
+      const endDate = moment(project.end_date);
+      const duration = endDate.diff(startDate, "days"); // Hitung durasi dalam hari
+
+      return {
+        ...project.toJSON(),
+        authorName: project.User.name, // Ambil nama berdasarkan data User saat registrasi
+        duration,
+      };
+    });
+
     res.render("index", {
-      projects,
+      projects: projectsWithAuthorAndDuration,
       isLoggedIn: !!req.session.userId,
       userName: req.session.userName,
     });
@@ -203,6 +218,7 @@ app.get("/logout", (req, res) => {
     res.redirect("/login");
   });
 });
+
 
 app.get("/project", isAuthenticated, (req, res) => {
   res.render("project", {
@@ -248,6 +264,60 @@ app.post("/project", upload.single("image"), async (req, res) => {
     res.status(500).send("Error adding project");
   }
 });
+
+// Route to show the edit form for a specific project
+app.get("/edit-project/:id", isAuthenticated, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const project = await Project.findByPk(id);
+    if (!project) {
+      return res.status(404).send("Project not found");
+    }
+    if (project.author_id !== req.session.userId) {
+      return res.status(403).send("You are not authorized to edit this project");
+    }
+    res.render("edit-project", { project });
+  } catch (err) {
+    console.error("Error fetching project for editing:", err.message);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.post("/edit-project/:id", isAuthenticated, upload.single("image"), async (req, res) => {
+  const { id } = req.params;
+  const { name, description } = req.body;
+  const start_date = moment(req.body.start_date).toDate();
+  const end_date = moment(req.body.end_date).toDate();
+  const technologies = Array.isArray(req.body.technologies)
+    ? req.body.technologies
+    : [req.body.technologies];
+  const image = req.file ? req.file.filename : null;
+
+  try {
+    const project = await Project.findByPk(id);
+    if (!project) {
+      return res.status(404).send("Project not found");
+    }
+    if (project.author_id !== req.session.userId) {
+      return res.status(403).send("You are not authorized to edit this project");
+    }
+
+    // Update the project fields
+    project.name = name;
+    project.description = description;
+    project.start_date = start_date;
+    project.end_date = end_date;
+    project.technologies = technologies;
+    if (image) project.image = image;
+
+    await project.save(); // Save the updated project
+    res.redirect("/");
+  } catch (err) {
+    console.error("Error updating project:", err.message);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 
 app.post("/delete-project/:id", async (req, res) => {
   const { id } = req.params;

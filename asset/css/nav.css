@@ -113,4 +113,9 @@ nav {
   .nav-button.active {
     display: flex;
   }
+
+  .welcome-message {
+    display: flex;
+    margin-right: 35px;
+  }
 }

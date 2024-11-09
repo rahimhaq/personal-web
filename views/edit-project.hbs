@@ -24,7 +24,7 @@
 
       <div class="navbar-right">
         {{#if isLoggedIn}}
-          <span class="welcome-message">Selamat Datang, {{userName}}!</span>
+          <span class="welcome-message">Welcome, {{userName}}!</span>
           <a href="/logout" class="nav-button">Logout</a>
         {{else}}
           <a href="/login" class="nav-button">Login</a>
@@ -71,78 +71,63 @@
         </h1>
       {{/unless}}
     </div>
-    <div class="container">
-      <h1>Edit Project</h1>
-      <form
-        action="/edit-project/{{id}}"
-        method="POST"
-        enctype="multipart/form-data"
-      >
-        <div class="form-group">
-          <label for="title">Project Title:</label>
-          <input
-            type="text"
-            id="title"
-            name="name"
-            value="{{project.name}}"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="startDate">Start Date:</label>
-          <input
-            type="date"
-            id="startDate"
-            name="start_date"
-            value="{{project.start_date}}"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="endDate">End Date:</label>
-          <input
-            type="date"
-            id="endDate"
-            name="end_date"
-            value="{{project.end_date}}"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="description">Description:</label>
-          <textarea
-            id="description"
-            name="description"
-            required
-          >{{project.description}}</textarea>
-        </div>
-        <div class="form-group">
-          <label>Technologies:</label>
-          <div class="tech-stack">
-            <label><input type="checkbox" name="technologies" value="HTML" />
-              HTML
-            </label>
-            <label><input type="checkbox" name="technologies" value="CSS" />
-              CSS
-            </label>
-            <label><input type="checkbox" name="technologies" value="JS" /> JS </label>
-            <label><input type="checkbox" name="technologies" value="TypeScript" />
-              TypeScript
-            </label>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="image">Upload Image:</label>
-          <input type="file" id="image" name="image" />
-          <img
-            src="/uploads/{{project.image}}"
-            alt="{{project.title}}"
-            class="preview"
-          />
-        </div>
-        <button type="submit" class="btn">Update</button>
-        <a href="/" class="btn cancel">Cancel</a>
-      </form>
+<div class="container">
+  <h1>Edit Project</h1>
+  <form action="/edit-project/{{project.id}}" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+      <label for="title">Judul Proyek:</label>
+      <input type="text" id="title" name="name" value="{{project.name}}" required />
     </div>
+
+    <div class="form-group">
+      <label for="startDate">Tanggal Mulai:</label>
+      <input type="date" id="startDate" name="start_date" value="{{project.start_date}}" required />
+    </div>
+
+    <div class="form-group">
+      <label for="endDate">Tanggal Selesai:</label>
+      <input type="date" id="endDate" name="end_date" value="{{project.end_date}}" required />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Deskripsi:</label>
+      <textarea id="description" name="description" required>{{project.description}}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Teknologi:</label>
+      <div class="tech-stack">
+        <label>
+          <input type="checkbox" name="technologies" value="HTML" 
+          {{#if (includes project.technologies "HTML")}}checked{{/if}} /> HTML
+        </label>
+        <label>
+          <input type="checkbox" name="technologies" value="CSS" 
+          {{#if (includes project.technologies "CSS")}}checked{{/if}} /> CSS
+        </label>
+        <label>
+          <input type="checkbox" name="technologies" value="JS" 
+          {{#if (includes project.technologies "JS")}}checked{{/if}} /> JS
+        </label>
+        <label>
+          <input type="checkbox" name="technologies" value="TypeScript" 
+          {{#if (includes project.technologies "TypeScript")}}checked{{/if}} /> TypeScript
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="image">Unggah Gambar:</label>
+      <input type="file" id="image" name="image" />
+      {{#if project.image}}
+      <img src="/public/uploads/{{project.image}}" alt="{{project.title}}" class="preview" />
+      {{/if}}
+    </div>
+
+    <button type="submit" class="btn">Update</button>
+    <a href="/" class="btn cancel">Cancel</a>
+  </form>
+</div>
+
   </body>
 </html>
