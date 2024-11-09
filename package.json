@@ -4,7 +4,7 @@
   "description": "this is my first personal web with js",
   "main": "index.js",
   "scripts": {
-    "postinstall" : "sequelize db:migrate",
+    "postinstall": "sequelize db:migrate",
     "start": "node app.js",
     "build": "echo 'No build step necessary for Express'",
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -1,12 +1,12 @@
-require("dotenv").config(); // Memuat variabel lingkungan dari .env
-const pg = require("pg"); // Mengimpor pg (PostgreSQL client)
+require("dotenv").config();
+const pg = require("pg");
 
 module.exports = {
   "development": {
     "username": process.env.POSTGRES_USER,
     "password": process.env.POSTGRES_PASSWORD,
     "database": process.env.POSTGRES_DATABASE,
-    "host": process.env.POSTGRES_HOST,
+    "host": process.env.POSTGRES_HOST || "localhost",
     "dialect": "postgres",
     dialectModule : pg,
     dialectOptions: {
@@ -26,5 +26,5 @@ module.exports = {
         rejectUnauthorized: false,
       },
     },
-  },
+  }
 }
