@@ -15,6 +15,7 @@
   "author": "rahimhaq",
   "license": "ISC",
   "dependencies": {
+    "@vercel/postgres": "^0.10.0",
     "bcrypt": "^5.1.1",
     "connect-pg-simple": "^10.0.0",
     "connect-session-sequelize": "^7.1.7",
