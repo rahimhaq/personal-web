@@ -23,6 +23,8 @@ const User = sequelize.define("User", {
   name: { type: DataTypes.STRING, allowNull: false },
   email: { type: DataTypes.STRING, unique: true, allowNull: false },
   password: { type: DataTypes.STRING, allowNull: false },
+}, {
+  tableName: 'Users',
 });
 
 // Model untuk tabel projects
@@ -34,6 +36,8 @@ const Project = sequelize.define("Project", {
   technologies: DataTypes.ARRAY(DataTypes.STRING),
   image: DataTypes.STRING,
   author_id: { type: DataTypes.INTEGER, allowNull: false },
+}, {
+  tableName: 'Projects',
 });
 
 // Relasi antar tabel
