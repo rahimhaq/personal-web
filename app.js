@@ -18,27 +18,9 @@ const dbConfig = config[environment];
 const sequelize = new Sequelize(dbConfig);
 module.exports = sequelize; // Ekspor sequelize untuk digunakan di bagian lain
 
-// Model untuk tabel users
-const User = sequelize.define("User", {
-  name: { type: DataTypes.STRING, allowNull: false },
-  email: { type: DataTypes.STRING, unique: true, allowNull: false },
-  password: { type: DataTypes.STRING, allowNull: false },
-}, {
-  tableName: 'Users',
-});
-
-// Model untuk tabel projects
-const Project = sequelize.define("Project", {
-  name: { type: DataTypes.STRING, allowNull: false },
-  description: DataTypes.TEXT,
-  start_date: DataTypes.DATE,
-  end_date: DataTypes.DATE,
-  technologies: DataTypes.ARRAY(DataTypes.STRING),
-  image: DataTypes.STRING,
-  author_id: { type: DataTypes.INTEGER, allowNull: false },
-}, {
-  tableName: 'Projects',
-});
+// Impor model
+const User = require("./models/user");
+const Project = require("./models/project");
 
 // Relasi antar tabel
 User.hasMany(Project, { foreignKey: "author_id" });
