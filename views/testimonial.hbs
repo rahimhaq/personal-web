@@ -16,7 +16,11 @@
         />
         <a href="/" class="nav-button">Home</a>
         <a href="/project" class="nav-button">Add Project</a>
-        <a href="/testimonial" class="nav-button" style="font-weight: 700">Testimonials</a>
+        <a
+          href="/testimonial"
+          class="nav-button"
+          style="font-weight: 700"
+        >Testimonials</a>
       </div>
 
       <div class="navbar-right">
@@ -37,8 +41,8 @@
 
     <!-- Hamburger menu container for mobile view -->
     <div id="hamburger-container" class="hamburger-container hide">
-      <h1 class="hamburger-container-item hamburger-active">
-        <a style="color: white; text-decoration: none;" href="/"> Home </a>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none;" href="/"> Home </a>
       </h1>
       <h1 class="hamburger-container-item">
         <a style="color: #232946; text-decoration: none;" href="/project">
@@ -50,9 +54,14 @@
           Contact Me
         </a>
       </h1>
-      <h1 class="hamburger-container-item">
-        <a style="color: #232946; text-decoration: none" href="/testimonial">
+      <h1 class="hamburger-container-item hamburger-active">
+        <a style="color: white; text-decoration: none" href="/testimonial">
           Testimonials
+        </a>
+      </h1>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none" href="/logout">
+          Logout
         </a>
       </h1>
       {{#unless isLoggedIn}}

@@ -41,16 +41,16 @@
 
     <!-- Hamburger menu container for mobile view -->
     <div id="hamburger-container" class="hamburger-container hide">
-      <h1 class="hamburger-container-item hamburger-active">
-        <a style="color: white; text-decoration: none;" href="/"> Home </a>
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none;" href="/"> Home </a>
       </h1>
       <h1 class="hamburger-container-item">
         <a style="color: #232946; text-decoration: none;" href="/project">
           Add Project
         </a>
       </h1>
-      <h1 class="hamburger-container-item">
-        <a style="color: #232946; text-decoration: none;" href="/contact">
+      <h1 class="hamburger-container-item hamburger-active">
+        <a style="color: white; text-decoration: none;" href="/contact">
           Contact Me
         </a>
       </h1>
@@ -59,18 +59,11 @@
           Testimonials
         </a>
       </h1>
-      {{#unless isLoggedIn}}
-        <h1 class="hamburger-container-item">
-          <a style="color: #232946; text-decoration: none" href="/login">
-            Login
-          </a>
-        </h1>
-        <h1 class="hamburger-container-item">
-          <a style="color: #232946; text-decoration: none" href="/register">
-            Register
-          </a>
-        </h1>
-      {{/unless}}
+      <h1 class="hamburger-container-item">
+        <a style="color: #232946; text-decoration: none" href="/logout">
+          Logout
+        </a>
+      </h1>
     </div>
     <main>
       <div class="container">

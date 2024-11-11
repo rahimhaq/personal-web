@@ -6,10 +6,10 @@ module.exports = {
     username: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
     database: process.env.POSTGRES_DATABASE,
-    host: process.env.POSTGRES_HOST || "localhost",
+    host: process.env.POSTGRES_HOST,
     dialect: "postgres",
-    dialectModule: pg,
-    dialectOptions: {
+    dialectModule: require("pg"),
+    dialectOptions: process.env.POSTGRES_HOST === "localhost" ? {} : {
       ssl: {
         require: true,
         rejectUnauthorized: false,
@@ -20,14 +20,15 @@ module.exports = {
     username: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
     database: process.env.POSTGRES_DATABASE,
-    host: process.env.POSTGRES_HOST || "localhost",
+    host: process.env.POSTGRES_HOST,
     dialect: "postgres",
-    dialectModule: pg,
+    dialectModule: require("pg"),
     dialectOptions: {
       ssl: {
         require: true,
         rejectUnauthorized: false,
       },
     },
+    sslmode:"require",
   },
 };

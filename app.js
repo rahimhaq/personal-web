@@ -114,6 +114,7 @@ app.post("/login", async (req, res) => {
 
   try {
     const user = await User.findOne({ where: { email } });
+    console.log("User  ditemukan:", user);
 
     if (user && bcrypt.compareSync(password, user.password)) {
       req.session.userId = user.id;
@@ -139,6 +140,7 @@ app.post("/register", async (req, res) => {
 
   try {
     const existingUser = await User.findOne({ where: { email } });
+    console.log("User  ditemukan:", existingUser);
 
     if (existingUser) {
       return res.redirect("/register?error=Email sudah terdaftar.");
