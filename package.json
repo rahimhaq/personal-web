@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "sequelize db:migrate",
-    "start": "node app.js",
+    "dev": "nodemon app.js",
     "build": "echo 'No build step necessary for Express'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

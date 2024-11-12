@@ -68,28 +68,43 @@
       {{/unless}}
     </div>
     <main>
-        <section class="project-detail">
-            <h1>{{project.name}}</h1>
-            <div class="project-content">
-                <img src="{{project.image}}" alt="{{project.title}}">
-                <div class="project-info">
-                    <h2>Duration</h2>
-                    <p>{{project.start_date}} - {{project.end_date}}</p>
-                    <p>{{project.duration}}</p>
-                    
-                    <h2>Technologies</h2>
-                    <div class="technologies">
-                        {{#each project.technologies}}
-                            <span>{{this}}</span>
-                        {{/each}}
-                    </div>
-                </div>
+      <section class="project-detail">
+        <h1 class="project-title">{{project.name}}</h1>
+
+        <div class="project-content">
+          <!-- Gambar Proyek di Kiri -->
+          <div class="project-image-container">
+            <img
+              src="/public/uploads/{{project.image}}"
+              alt="{{project.name}}"
+              class="project-image"
+            />
+          </div>
+
+          <!-- Duration dan Technologies di Kanan -->
+          <div class="project-info">
+            <h2>Duration</h2>
+            <p><strong>Start Date:</strong>
+              {{formatDate project.start_date}}</p>
+            <p><strong>End Date:</strong> {{formatDate project.end_date}}</p>
+            <p>{{project.duration}} days</p>
+
+            <h2>Technologies</h2>
+            <div class="technologies">
+              {{#each project.technologies}}
+                <span>{{this}}</span>
+              {{/each}}
             </div>
-            <p>{{project.description}}</p>
-        </section>
+          </div>
+        </div>
+
+        <div class="project-description">
+          <p>{{project.description}}</p>
+        </div>
+      </section>
     </main>
 
-    {{!-- <script src="asset/js/project-detail.js"></script> --}}
-    <script src="asset/js/nav.js"></script>
+    {{! <script src="asset/js/project-detail.js"></script> }}
+    {{! <script src="asset/js/nav.js"></script> }}
   </body>
 </html>

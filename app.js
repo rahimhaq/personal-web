@@ -7,16 +7,17 @@ const port = 3000;
 const moment = require("moment");
 const hbs = require("hbs");
 hbs.registerHelper("includes", (array, value) => array && array.includes(value));
+hbs.registerHelper("eq", (a, b) => a === b);
 
 
-// Ambil environment yang dipilih
+// environtment
 require("dotenv").config()
 const { Sequelize, DataTypes } = require("sequelize");
 const config = require("./config/config");
 const environment = process.env.NODE_ENV || "development";
 const dbConfig = config[environment];
 const sequelize = new Sequelize(dbConfig);
-module.exports = sequelize; // Ekspor sequelize untuk digunakan di bagian lain
+module.exports = sequelize;
 
 // Impor model
 const User = require("./models/user");
@@ -84,6 +85,11 @@ app.use("/asset/js", express.static("asset/js"));
 app.use("/views", express.static("views"));
 app.use("/public/uploads", express.static("public/uploads"));
 
+// Helper untuk format tanggal
+app.locals.formatDate = (date) => {
+  return moment(date).format("MMMM D, YYYY"); // Format contoh: "July 1, 2024"
+};
+
 // Middleware
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "views"));
@@ -119,6 +125,7 @@ app.post("/login", async (req, res) => {
     if (user && bcrypt.compareSync(password, user.password)) {
       req.session.userId = user.id;
       req.session.userName = user.name;
+      console.log("Login Berhasil")
       return res.redirect("/");
     } else {
       return res.redirect("/login?error=Email/Password salah.");
@@ -129,7 +136,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Route GET halaman register
 app.get("/register", (req, res) => {
   res.render("register", { error: req.query.error });
 });
@@ -180,6 +186,7 @@ app.get("/", isAuthenticated, async (req, res) => {
       projects: projectsWithAuthorAndDuration,
       isLoggedIn: !!req.session.userId,
       userName: req.session.userName,
+      userId: req.session.userId,
     });
   } catch (err) {
     console.error("Error fetching projects:", err);
@@ -195,7 +202,11 @@ app.get("/testimonial", isAuthenticated, (req, res) => {
 });
 
 app.get("/contact", (req, res) => {
-  res.render("contact");
+  res.render("contact", {
+    isLoggedIn: !!req.session.userId,
+    userName: req.session.userName,
+  });
+  
 });
 
 app.get("/logout", (req, res) => {
@@ -221,6 +232,12 @@ app.get("/project-detail/:id", async (req, res) => {
     const project = await Project.findByPk(id, {
       include: [{ model: User, attributes: ["name"] }],
     });
+  
+    // Menghitung duration (selisih hari antara start_date dan end_date)
+    const startDate = moment(project.start_date);
+    const endDate = moment(project.end_date);
+    project.duration = endDate.diff(startDate, 'days'); // Hitung jumlah hari
+
     res.render("project-detail", { project });
   } catch (err) {
     console.error(err.message);
@@ -311,6 +328,16 @@ app.post("/delete-project/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
+    const project = await Project.findByPk(id);
+    if (!project) {
+      return res.status(404).send("Project not found");
+    }
+
+    // Periksa apakah user adalah pemilik proyek
+    if (project.author_id !== req.session.userId) {
+      return res.status(403).send("You are not authorized to delete this project");
+    }
+
     await Project.destroy({ where: { id } });
     res.redirect("/");
   } catch (err) {

@@ -18,9 +18,11 @@
           alt="Dumbways Logo"
           style="width: 70px;"
         />
-        <a href="/" class="nav-button">Home</a>
-        <a href="/project" class="nav-button">Add Project</a>
-        <a href="/testimonial" class="nav-button">Testimonials</a>
+        {{#if isLoggedIn}}
+          <a href="/" class="nav-button">Home</a>
+          <a href="/project" class="nav-button">Add Project</a>
+          <a href="/testimonial" class="nav-button">Testimonials</a>
+        {{/if}}
       </div>
 
       <div class="navbar-right">

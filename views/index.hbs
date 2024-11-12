@@ -4,7 +4,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Project</title>
     <link rel="stylesheet" href="/asset/css/index.css" />
-    <link rel="stylesheet" href="/asset/css/index-project.css" />
     <link rel="stylesheet" href="/asset/css/nav.css" />
     <link
       rel="stylesheet"
@@ -129,36 +128,36 @@
           {{#each projects}}
             <div class="project-card">
               <!-- Path untuk gambar proyek -->
+              <a href="/project-detail/{{this.id}}" style="text-decoration: none;">
               <img
                 src="/public/uploads/{{this.image}}"
                 alt="{{name}}"
                 class="project-image"
               />
               <h2>{{this.name}}</h2>
+              </a>
               <p><strong>Duration:</strong> {{this.duration}} days</p>
               <p><strong>Technologies:</strong> {{this.technologies}}</p>
               <p><strong>Author:</strong> {{this.authorName}}</p>
+              
               <!-- Tombol Edit dan Delete -->
-              <button
-                onclick="window.location.href='/edit-project/{{this.id}}'"
-                class="edit-btn"
-              >Edit</button>
-              <form
-                action="/delete-project/{{this.id}}"
-                method="POST"
-                style="display:inline;"
-              >
-                <button type="submit" class="delete-btn">Delete</button>
-              </form>
-              <a href="/project-detail/{{this.id}}" class="button-detail">
-                <i class="button-detail-icon fas fa-arrow-right"></i>
-
-              </a>
+              {{#if (eq this.author_id ../userId)}}
+                <button
+                  onclick="window.location.href='/edit-project/{{this.id}}'"
+                  class="edit-btn"
+                >Edit</button>
+                <form
+                  action="/delete-project/{{this.id}}"
+                  method="POST"
+                  style="display:inline;"
+                >
+                  <button type="submit" class="delete-btn">Delete</button>
+                </form>
+              {{/if}}
             </div>
           {{/each}}
         </div>
       </div>
-
     </main>
 
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
