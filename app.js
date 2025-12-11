@@ -165,6 +165,23 @@ app.post("/register", async (req, res) => {
   }
 });
 
+// Route DADAKAN untuk inisialisasi Database di Vercel
+app.get("/init-db", async (req, res) => {
+  try {
+    // 1. Paksa buat tabel session
+    await sessionStore.sync(); 
+    
+    // 2. Paksa sinkronisasi semua model (User, Project, dll)
+    // Gunakan { alter: true } agar data lama tidak hilang
+    await sequelize.sync({ alter: true });
+    
+    res.send("Database berhasil disinkronisasi! Tabel user_sessions dan lainnya sudah dibuat.");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Gagal sync database: " + err.message);
+  }
+});
+
 // Route GET halaman utama dengan proteksi autentikasi
 app.get("/", isAuthenticated, async (req, res) => {
   try {
