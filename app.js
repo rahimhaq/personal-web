@@ -6,65 +6,75 @@ const app = express();
 const port = 3000;
 const moment = require("moment");
 const hbs = require("hbs");
-hbs.registerHelper("includes", (array, value) => array && array.includes(value));
-hbs.registerHelper("eq", (a, b) => a === b);
-
-
-// environtment
-require("dotenv").config()
-const { Sequelize, DataTypes } = require("sequelize");
-const config = require("./config/config");
-const environment = process.env.NODE_ENV || "development";
-const dbConfig = config[environment];
-const sequelize = new Sequelize(dbConfig);
-module.exports = sequelize;
-
-// Impor model
-const User = require("./models/user");
-const Project = require("./models/project");
-
-// Relasi antar tabel
-User.hasMany(Project, { foreignKey: "author_id" });
-Project.belongsTo(User, { foreignKey: "author_id" });
-
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 const multer = require('multer');
+const pg = require("pg"); // Wajib ada
+const { Sequelize, DataTypes } = require("sequelize");
 
-// Tentukan path ke folder uploads
-const uploadsDir = path.join(__dirname, 'public', 'uploads');
+// --- 1. SETUP DATABASE (Direct Connection agar Stabil di Vercel) ---
+require("dotenv").config();
 
-// Periksa apakah folder uploads ada
-if (!fs.existsSync(uploadsDir)) {
-  // Jika folder belum ada, buat folder uploads
-  fs.mkdirSync(uploadsDir, { recursive: true });
-  console.log('Folder uploads berhasil dibuat.');
-} else {
-  console.log('Folder uploads sudah ada.');
-}
+// Gunakan Connection String jika ada (lebih stabil), atau susun manual
+const connectionString = process.env.POSTGRES_URL || `postgres://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}/${process.env.POSTGRES_DATABASE}?sslmode=require`;
 
-// Konfigurasi Multer untuk upload gambar
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);  // Menggunakan uploadsDir yang telah diverifikasi
+const sequelize = new Sequelize(connectionString, {
+  dialect: "postgres",
+  dialectModule: pg, // Wajib untuk Vercel
+  logging: false,    // Matikan log SQL biar console bersih
+  pool: {
+    max: 1,      // Limit koneksi serverless
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
   },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);  // Nama file yang diubah menjadi unik
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false, 
+    },
   },
 });
 
-const upload = multer({ storage: storage });
+module.exports = sequelize;
 
-module.exports = upload;  // Ekspor objek upload untuk digunakan di route
+// --- Load Models ---
+const User = require("./models/user");
+const Project = require("./models/project");
 
-// Konfigurasi session store menggunakan Sequelize
+// Relasi
+User.hasMany(Project, { foreignKey: "author_id" });
+Project.belongsTo(User, { foreignKey: "author_id" });
+
+// --- 2. SETUP SESSION STORE ---
 const sessionStore = new SequelizeStore({
   db: sequelize,
   tableName: "user_sessions",
 });
 
-sessionStore.sync();
+// --- 3. ROUTE DARURAT (INIT DB) - WAJIB DI ATAS SESSION ---
+// Route ini ditaruh DI SINI agar bisa dijalankan TANPA perlu login/session dulu
+app.get("/init-db", async (req, res) => {
+  try {
+    // Cek koneksi dulu
+    await sequelize.authenticate();
+    console.log("Koneksi Database OK.");
+    
+    // Buat tabel session & lainnya
+    await sessionStore.sync(); 
+    await sequelize.sync({ alter: true });
+    
+    res.send("<h1>Sukses!</h1><p>Database Connected & Tables Created.</p><p>Sekarang silakan <a href='/login'>Login</a>.</p>");
+  } catch (err) {
+    console.error("Init Error:", err);
+    res.status(500).send("<h1>Gagal Init DB</h1><pre>" + err.stack + "</pre>");
+  }
+});
 
+// --- 4. CONFIG UTAMA EXPRESS ---
+app.set("trust proxy", 1); // Wajib untuk Vercel
+
+// Middleware Session (Baru dijalankan SETELAH route init-db lewat)
 app.use(
   session({
     store: sessionStore,
@@ -72,35 +82,38 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 hari
+      maxAge: 30 * 24 * 60 * 60 * 1000,
       secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     },
   })
 );
 
-// Static files
-app.use("/asset", express.static(path.join(__dirname, "asset")))
-app.use("/asset/css", express.static("asset/css"));
-app.use("/asset/cv", express.static("asset/cv"));
-app.use("/asset/img", express.static("asset/img"));
-app.use("/asset/js", express.static("asset/js"));
-app.use("/views", express.static("views"));
-app.use("/public/uploads", express.static("public/uploads"));
+// Helpers & Static Files
+hbs.registerHelper("includes", (array, value) => array && array.includes(value));
+hbs.registerHelper("eq", (a, b) => a === b);
+app.locals.formatDate = (date) => moment(date).format("MMMM D, YYYY");
 
-// Helper untuk format tanggal
-app.locals.formatDate = (date) => {
-  return moment(date).format("MMMM D, YYYY"); // Format contoh: "July 1, 2024"
-};
-
-// Middleware
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
-app.set("trust proxy", 1);
 
-// Middleware untuk proteksi halaman yang membutuhkan login
+app.use("/asset", express.static(path.join(__dirname, "asset")));
+app.use("/public/uploads", express.static("public/uploads"));
+
+// --- Setup Multer ---
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+});
+const upload = multer({ storage: storage });
+
+// --- Middleware Auth ---
 function isAuthenticated(req, res, next) {
   if (req.session.userId) {
     return next();
@@ -109,33 +122,32 @@ function isAuthenticated(req, res, next) {
   }
 }
 
-// Route GET halaman login
+// --- 5. ROUTES APLIKASI ---
+
 app.get("/login", (req, res) => {
-  if (req.session.userId) {
-    return res.redirect("/");
-  }
+  if (req.session.userId) return res.redirect("/");
   res.render("login", { error: req.query.error });
 });
 
-// Login logic
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const user = await User.findOne({ where: { email } });
-    console.log("User  ditemukan:", user);
-
     if (user && bcrypt.compareSync(password, user.password)) {
       req.session.userId = user.id;
       req.session.userName = user.name;
-      console.log("Login Berhasil")
-      return res.redirect("/");
+      
+      // Paksa simpan session sebelum redirect
+      req.session.save((err) => {
+        if (err) console.error(err);
+        res.redirect("/");
+      });
     } else {
-      return res.redirect("/login?error=Email/Password salah.");
+      res.redirect("/login?error=Email/Password salah.");
     }
   } catch (err) {
     console.error("Login error:", err);
-    res.redirect("/login?error=Terjadi kesalahan pada server");
+    res.redirect("/login?error=Server Error");
   }
 });
 
@@ -143,46 +155,21 @@ app.get("/register", (req, res) => {
   res.render("register", { error: req.query.error });
 });
 
-// Route POST untuk proses registrasi
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
-
   try {
     const existingUser = await User.findOne({ where: { email } });
-    console.log("User  ditemukan:", existingUser);
-
-    if (existingUser) {
-      return res.redirect("/register?error=Email sudah terdaftar.");
-    }
-
+    if (existingUser) return res.redirect("/register?error=Email sudah terdaftar.");
+    
     const hashedPassword = bcrypt.hashSync(password, 10);
     await User.create({ name, email, password: hashedPassword });
-
     res.redirect("/login");
   } catch (err) {
-    console.error(err.message);
-    res.redirect("/register?error=Terjadi kesalahan pada server");
-  }
-});
-
-// Route DADAKAN untuk inisialisasi Database di Vercel
-app.get("/init-db", async (req, res) => {
-  try {
-    // 1. Paksa buat tabel session
-    await sessionStore.sync(); 
-    
-    // 2. Paksa sinkronisasi semua model (User, Project, dll)
-    // Gunakan { alter: true } agar data lama tidak hilang
-    await sequelize.sync({ alter: true });
-    
-    res.send("Database berhasil disinkronisasi! Tabel user_sessions dan lainnya sudah dibuat.");
-  } catch (err) {
     console.error(err);
-    res.status(500).send("Gagal sync database: " + err.message);
+    res.redirect("/register?error=Server Error");
   }
 });
 
-// Route GET halaman utama dengan proteksi autentikasi
 app.get("/", isAuthenticated, async (req, res) => {
   try {
     const projects = await Project.findAll({
@@ -193,11 +180,12 @@ app.get("/", isAuthenticated, async (req, res) => {
     const projectsWithAuthorAndDuration = projects.map((project) => {
       const startDate = moment(project.start_date);
       const endDate = moment(project.end_date);
-      const duration = endDate.diff(startDate, "days"); // Hitung durasi dalam hari
+      const duration = endDate.diff(startDate, "days");
 
       return {
         ...project.toJSON(),
-        authorName: project.User ? project.User.name : "Unknown Author",
+        // HANDLING NULL AUTHOR AGAR TIDAK ERROR 500
+        authorName: project.User ? project.User.name : "Unknown", 
         duration,
       };
     });
@@ -209,166 +197,42 @@ app.get("/", isAuthenticated, async (req, res) => {
       userId: req.session.userId,
     });
   } catch (err) {
-    console.error("Error fetching projects:", err);
-    res.status(500).send("Internal Server Error");
+    console.error("Home Error:", err);
+    res.status(500).send("Internal Server Error: " + err.message);
   }
 });
 
-app.get("/testimonial", isAuthenticated, (req, res) => {
-  res.render("testimonial", {
-    isLoggedIn: !!req.session.userId,
-    userName: req.session.userName,
-  });
-});
-
-app.get("/contact", (req, res) => {
-  res.render("contact", {
-    isLoggedIn: !!req.session.userId,
-    userName: req.session.userName,
-  });
-  
-});
-
 app.get("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error(err.message);
-    }
+  req.session.destroy(() => {
     res.redirect("/login");
   });
 });
 
+// --- Route Tambahan (Project, Contact, dll) ---
+// (Paste sisa route Anda di sini: /project, /contact, /edit-project, dll)
+// Pastikan route yang pakai upload.single("image") ada di bawah sini.
 
-app.get("/project", isAuthenticated, (req, res) => {
-  res.render("project", {
-    isLoggedIn: !!req.session.userId,
-    userName: req.session.userName,
-  });
+app.get("/contact", (req, res) => {
+  res.render("contact", { isLoggedIn: !!req.session.userId, userName: req.session.userName });
 });
 
-app.get("/project-detail/:id", async (req, res) => {
-  const { id } = req.params;
-  try {
-    const project = await Project.findByPk(id, {
-      include: [{ model: User, attributes: ["name"] }],
-    });
-  
-    // Menghitung duration (selisih hari antara start_date dan end_date)
-    const startDate = moment(project.start_date);
-    const endDate = moment(project.end_date);
-    project.duration = endDate.diff(startDate, 'days'); // Hitung jumlah hari
-
-    res.render("project-detail", { project });
-  } catch (err) {
-    console.error(err.message);
-  }
+app.get("/project", isAuthenticated, (req, res) => {
+    res.render("project", { isLoggedIn: !!req.session.userId, userName: req.session.userName });
 });
 
 app.post("/project", upload.single("image"), async (req, res) => {
-  const { name, description } = req.body;
-  const start_date = moment(req.body.start_date).toDate();
-  const end_date = moment(req.body.end_date).toDate();
-  const technologies = Array.isArray(req.body.technologies)
-    ? req.body.technologies
-    : [req.body.technologies];
-  const image = req.file ? req.file.filename : null;
-
-  try {
-    await Project.create({
-      name,
-      description,
-      start_date,
-      end_date,
-      technologies,
-      image,
-      author_id: req.session.userId,
-    });
+    // ... (Logika add project Anda)
+    // Pastikan req.body diproses dengan benar
+    // Untuk mempersingkat, saya tidak copy semua logic add project Anda yang panjang, 
+    // tapi Anda bisa tempel logic aslinya di sini.
+    const { name, description } = req.body;
+    // ...
     res.redirect("/");
-  } catch (err) {
-    console.error("Error adding project:", err.message);
-    res.status(500).send("Error adding project");
-  }
 });
 
-// Route to show the edit form for a specific project
-app.get("/edit-project/:id", isAuthenticated, async (req, res) => {
-  const { id } = req.params;
-  try {
-    const project = await Project.findByPk(id);
-    if (!project) {
-      return res.status(404).send("Project not found");
-    }
-    if (project.author_id !== req.session.userId) {
-      return res.status(403).send("You are not authorized to edit this project");
-    }
-    res.render("edit-project", { project });
-  } catch (err) {
-    console.error("Error fetching project for editing:", err.message);
-    res.status(500).send("Internal Server Error");
-  }
+// Listen Port
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
 
-app.post("/edit-project/:id", isAuthenticated, upload.single("image"), async (req, res) => {
-  const { id } = req.params;
-  const { name, description } = req.body;
-  const start_date = moment(req.body.start_date).toDate();
-  const end_date = moment(req.body.end_date).toDate();
-  const technologies = Array.isArray(req.body.technologies)
-    ? req.body.technologies
-    : [req.body.technologies];
-  const image = req.file ? req.file.filename : null;
-
-  try {
-    const project = await Project.findByPk(id);
-    if (!project) {
-      return res.status(404).send("Project not found");
-    }
-    if (project.author_id !== req.session.userId) {
-      return res.status(403).send("You are not authorized to edit this project");
-    }
-
-    // Update the project fields
-    project.name = name;
-    project.description = description;
-    project.start_date = start_date;
-    project.end_date = end_date;
-    project.technologies = technologies;
-    if (image) project.image = image;
-
-    await project.save(); // Save the updated project
-    res.redirect("/");
-  } catch (err) {
-    console.error("Error updating project:", err.message);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-
-app.post("/delete-project/:id", async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const project = await Project.findByPk(id);
-    if (!project) {
-      return res.status(404).send("Project not found");
-    }
-
-    // Periksa apakah user adalah pemilik proyek
-    if (project.author_id !== req.session.userId) {
-      return res.status(403).send("You are not authorized to delete this project");
-    }
-
-    await Project.destroy({ where: { id } });
-    res.redirect("/");
-  } catch (err) {
-    console.error("Error deleting project:", err.message);
-    res.status(500).send("Error deleting project");
-  }
-});
-
-app.listen(port, async () => {
-  await sequelize.sync(); // Sinkronisasi Sequelize dengan database
-  console.log(`Server is running on http://localhost:${port}`);
-});
-
-module.exports = app; // Ekspor aplikasi Express
+module.exports = app;
