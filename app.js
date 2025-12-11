@@ -63,7 +63,7 @@ const sessionStore = new SequelizeStore({
   tableName: "user_sessions",
 });
 
-app.set("trust proxy", 1);
+sessionStore.sync();
 
 app.use(
   session({
@@ -98,6 +98,7 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
+app.set("trust proxy", 1);
 
 // Middleware untuk proteksi halaman yang membutuhkan login
 function isAuthenticated(req, res, next) {
@@ -179,7 +180,7 @@ app.get("/", isAuthenticated, async (req, res) => {
 
       return {
         ...project.toJSON(),
-        authorName: project.User.name, // Ambil nama berdasarkan data User saat registrasi
+        authorName: project.User ? project.User.name : "Unknown Author",
         duration,
       };
     });
